@@ -7,10 +7,10 @@ from dlt.basic.unet import UNet
 from sentinel_dataset import Dataset
 
 #Configuration
-network_path = 'trained_models/forest_cover.pt'
+network_path = 'saved_models/atmospheric_correction_b02.pt'
 target_is_classes = False #Put to false for regression problems
 n_output_channels = 1
-model_name = 'forest_cover'
+model_name = network_path.split('/')[-1].replace('.pt','')
 
 data_bands = ['B02', 'B03', 'B04', 'B08', 'B05', 'B06', 'B07', 'B8A', 'B11', 'B12']
 pred_win_size = [1024, 1024]
