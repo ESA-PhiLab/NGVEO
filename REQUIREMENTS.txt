@@ -49,6 +49,8 @@ pytz==2018.5
 PyWavelets==1.0.1
 pyzmq==17.1.2
 qtconsole==4.4.1
+rasterio>=1.0
+s2cloudless==1.2.0
 scikit-image==0.14.0
 scikit-learn==0.19.2
 scipy==1.1.0
@@ -71,3 +73,4 @@ wcwidth==0.1.7
 webencodings==0.5.1
 Werkzeug==0.14.1
 widgetsnbextension==3.4.2
+s2cloudless

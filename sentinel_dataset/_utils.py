@@ -119,13 +119,9 @@ def parse_eodata_folder_name(name):
         out['mission_data_take_id'] = name_parts[7]
         out['product_unique_id'] = name_parts[8]
 
-        #Todo: Can we optain a Tile Number field from sentinel 2?
-        out['tile_id'] = out['mission_data_take_id']
-
-
     elif out['sentinel_type'] == 3:
         # TODO: add support for sentinel 3 name formats
-        raise NotImplementedError('parse_eodata_folder_name() does not support sentinel-3 year')
+        raise NotImplementedError('parse_eodata_folder_name() does not support sentinel-3 yet')
 
     return out
 

@@ -1,33 +1,30 @@
 ## NGVEO - New Generation Value chain for Earth Observation
-<<<<<<< HEAD
-This repository contains code for applying deep learning to Earth Observation data, with focus on Sentinel data.
+Code for applying convolutional neural networks (CNN) to Earth Observation data from Sentinel 1 and 2 using python and PyTorch.
 
-The code base is being actively developed until January 2019 and can not be expected to be stable until then.
-=======
+### Setup:
+- Clone repository.
+- Install the requred python packages: pip3 install -r REQUIREMENTS.txt
+- Download example data from GDRIVE_LINK_GOES_HERE, and extract content into data-catalog.
+- It is recommended to have a computer with a GPU (minimum 8GB memory) with CUDA and CUDNN installed.
 
-This repository contains code for applying convolutional neural networks (CNN) to Earth Observation data. The code supports earth observation data from ESAs Sentinel satelites.
-
-Warning: The code base is being actively developed until January 2019 and can not be expected to be stable until then.
-
-#### Setup:
-- Download or clone repository
-- Install requirements: pip3 install -r REQUIREMENTS.txt
-- For the forest-demo, download example data and move the folder "data" into demo_forest.
-- It is recomended to have a computer with a GPU (minimun 8GB memory) with CUDA and CUDNN installed.
-
-#### Main files:
-- preprocessing.py - Move data from ESAs eodata-storage to an efficient np.memmap-format suitable for training CNNs.
+### Typical workflow:
+- Define a training dataset and make a list of tiles to include (https://finder.eocloud.eu/)
+- prepare_data.py - Move data from ESAs eodata-storage to a local storage with an efficient np.memmap-format suitable for training CNNs. Both training-data and test-data should be prepared. 
 - train.py - code for training a CNN
-- inference.py - code for applying a trained CNN to new EO data
-- evalutaion.py - code for evaluating the performance of the CNN
-
-#### Other files worth taking a look at:
-- sentinel_dataset/tile.py      - class for reading each EO-tile with the np.memmap-format
-- sentinel_dataset/dataset.py   - class for combining tile-objects into one dataset for training, validation, or testing
-
-#### Forest-demo:
-Use the demo_forest.ipynb-notebook for applying the tree-height and tree-cover networks to sentnel data.
+- predict.py - code for applying a trained network to new data and store as GEO-tiff 
+- demo.ipynb - notebook for visualizing results using a trained model
 
 
 
->>>>>>> master
+### Credit:
+- UNet implementation by Jackson Huang: https://github.com/jaxony/unet-pytorch
+- SAR geocoding library by the Norwegian Computing Center
+
+### Authors:
+Anders U. Waldeland* (anders@nr.no), Arnt-Børre Salberg*, Allessandro Marin** and Øyvind Due Trier* 
+
+\* Norwegian Computing Center (https://www.nr.no/)
+
+\** Phi Lab, European Space Agency (http://blogs.esa.int/philab/)
+
+ 

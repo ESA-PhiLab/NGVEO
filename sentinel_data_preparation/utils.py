@@ -12,11 +12,10 @@ def save_np_memmap(filename, data, dtype):
     del f
 
 def save_list_of_labelled_pixels(mask, out_path):
-# Make image with coordinates
-    y = np.linspace(0, mask.shape[0], num=mask.shape[0], dtype='uint16')
-    x = np.linspace(0, mask.shape[1], num=mask.shape[1], dtype='uint16')
+    # Make image with coordinates
+    y = np.linspace(0, mask.shape[0]-1, num=mask.shape[0], dtype='uint16')
+    x = np.linspace(0, mask.shape[1]-1, num=mask.shape[1], dtype='uint16')
     y, x = np.meshgrid(x, y, indexing='ij')
-    #import pdb; pdb.set_trace()
     # Select pixels with mask==true
     y = y[mask.astype('bool')]
     x = x[mask.astype('bool')]

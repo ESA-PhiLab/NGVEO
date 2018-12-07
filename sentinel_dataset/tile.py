@@ -1,9 +1,11 @@
 from __future__ import print_function
+
+import json
 import os
 import numpy as np
 
-from sentinel_dataset.utils import parse_eodata_folder_name
-
+from sentinel_dataset._utils import parse_eodata_folder_name
+import rasterio
 
 class Tile(object):
     """ Utilities for reading tile objects"""
@@ -11,36 +13,69 @@ class Tile(object):
     data_prefix = 'data_'
     key_prefix_label = 'lbl_'
     key_meta_data = 'meta_data'
-    key_cloud_mask = 'cloud_mask'
+    # key_cloud_mask = 'cloud_mask'
 
 
-    def __init__(self, path, win=[512,512]):
+    def __init__(self, path, win=[512,512], key_missing_mask=None):
         """ Constructor """
         self.path = path
         self.name = self.path.strip('/').split('/')[-2]
+        self.key_missing_mask = key_missing_mask
 
 
         print(' - DataFile: Opening', self.name, self.path)
 
         #Load meta data
         with np.load( os.path.join(self.path, 'meta_data.npz')) as f:
-            self.meta_data = f['meta_data'][()]
+            try:
+                self.meta_data = f['meta_data'][()]
+            except:
+                self.meta_data = f['metadata'][()]
+
+        #Set the missing mask
+        if self.meta_data['sensor'] == "Sentinel-1":
+            self.key_missing_mask = "layover_mask"
+        else:
+            self.key_missing_mask = "cloud_mask"
 
         # Get shape
         self.shape = self.meta_data['shape']
 
         #Load list of labelled pixels
-        with  np.load(os.path.join(self.path, 'labelled_pixels.npz')) as f:
-            self.labelled_pixels = np.concatenate( [ np.expand_dims(f['y'],-1), np.expand_dims(f['x'],-1)], -1)
-            # self.labelled_pixels is matrix of shape [N,2]
-        self.labelled_pixels = self._remove_edge_pixels(win, self.labelled_pixels)
+        if os.path.isfile(os.path.join(self.path, 'labelled_pixels.npz')):
+            with  np.load(os.path.join(self.path, 'labelled_pixels.npz')) as f:
+                self.labelled_pixels = np.concatenate( [ np.expand_dims(f['y'],-1), np.expand_dims(f['x'],-1)], -1)
+                # self.labelled_pixels is matrix of shape [N,2]
+            self.labelled_pixels = self._remove_edge_pixels(win, self.labelled_pixels)
 
-        #Make list of non-overlapping labelled pixels
-        if win == [0,0]:
-            self.nolp = np.copy(self.labelled_pixels)
+            #Make list of non-overlapping labelled pixels
+            if win == [0,0]:
+                self.nolp = np.copy(self.labelled_pixels)
+            else:
+                self.nolp = self._make_list_of_non_overlapping_pixels(win)
         else:
-            self.nolp = self._make_list_of_non_overlapping_pixels(win)
+            #When no list with labelled_pixels is provided we assume that all pixels are labelled
+            
+            #Make list of non-overlapping labelled pixels
+            if win == [0,0]:
+                self.nolp = None
+            else:
+                y = np.arange(win[0]//2, self.shape[0]-win[0]//2, win[0])
+                x = np.arange(win[1]//2, self.shape[1]-win[1]//2, win[1] )
+                y, x = np.meshgrid(x, y, indexing='ij')
+                # import pdb; pdb.set_trace()
+                # Select pixels with mask==true
 
+                self.nolp = np.concatenate( [np.expand_dims(y.flatten(),1), np.expand_dims(x.flatten(),1)],1)
+
+        #Read mapinfo-json file (this is used in export_predictions_to_tif)
+        mapinfo_file = os.path.join(self.path, "mapinfo.json")
+        if os.path.isfile(mapinfo_file):
+            with open(mapinfo_file) as file:
+                self.map_info = json.load(file)
+        else:
+            self.map_info = None
+            print('Warning: mapinfo.json was not found. Writing predictions to tif will not be possible.')
 
         #Update meta-data
         self.meta_data.update({
@@ -52,6 +87,9 @@ class Tile(object):
 
         #Add tile id
         self.tile_id = self.meta_data['tile_id']
+
+        #Add filename
+        self.file_name = self.meta_data["full_name"]
 
         #Check that bands in folder matches bands in meta_data
         bands_in_folder = [f.replace(self.data_prefix,'') for f in self._get_memmap_names() if 'data_' in f]
@@ -106,7 +144,7 @@ class Tile(object):
         wl = np.array(win) // 2
         wr = np.array(win) - wl
 
-        #Check which pixels that are within "safe-zone"
+        #Check which pixels that are not close to edge of tile
         indexes_within_bounds = np.greater(coordinate_list[:, 0], wl[0]) * \
                              np.less(coordinate_list[:, 0], self.shape[0] - wr[0]) * \
                              np.greater(coordinate_list[:, 1], wl[1]) * \
@@ -116,6 +154,34 @@ class Tile(object):
 
         return coordinate_list
 
+
+    def export_prediction_to_tif(self, out_file_path, prediction):
+        """
+
+        :param out_file_path:
+        :param prediction: a np-array where second dim indicate n-channels
+        :return:
+        """
+
+        #Check if map-info is available
+        if self.map_info is None:
+            class MissingMapInfoException(Exception): pass
+            raise MissingMapInfoException()
+
+        #Compute geo-meta data
+        geo = self.map_info['transform']
+        transf = rasterio.Affine(geo[1], geo[2], geo[0], geo[4], geo[5], geo[3])
+        crs = {'init': self.map_info['cs_code']}
+
+        #Write to file
+        with rasterio.open(out_file_path, "w", driver="GTiff", compress="lzw", bigtiff="YES",
+                           height=prediction.shape[0], width=prediction.shape[1], count=prediction.shape[2],
+                           dtype=prediction.dtype,
+                           crs=crs, transform=transf) as out_file:
+
+            for band_no in range(0, prediction.shape[2]):
+                out_file.write(prediction[:,:,band_no], band_no + 1)
+        print('Exported predictions to', out_file_path)
 
     def get_meta_data(self):
         return self.meta_data
@@ -142,13 +208,13 @@ class Tile(object):
 
         label_identifiers = [self.key_prefix_label + bi.lower() for bi in label_identifiers]
         #Hack to make 'cloud_mask' be accsessible as a label
-        label_identifiers = [li.replace(self.key_prefix_label+self.key_cloud_mask, self.key_cloud_mask) for li in label_identifiers]
+        label_identifiers = [li.replace(self.key_prefix_label+self.key_missing_mask, self.key_missing_mask) for li in label_identifiers]
         return  [self._open_memmap(b.lower()) for b in label_identifiers]
 
 
-    def get_cloud_mask(self):
+    def get_missing_mask(self):
         """ Reads and returns cloud mask """
-        return [np.expand_dims(self._open_memmap(self.key_cloud_mask),-1)]
+        return [np.expand_dims(self._open_memmap(self.key_missing_mask),-1)]
 
 
     def _get_memmap_names(self):
@@ -162,14 +228,30 @@ class Tile(object):
 
 
     def get_overlapping_coordinate_no(self,no):
-        return self.labelled_pixels[no,:]
+        if hasattr(self, 'labelled_pixels'):
+            return self.labelled_pixels[no,:]
+        else:
+            x = no % self.shape[1]
+            y = int((no - x) / self.shape[0])
+            return np.array([y,x])
 
 
     def get_non_overlapping_coordinate_no(self,no):
         return self.nolp[no, :]
 
 
-    def __len__(self):
+    def n_non_overlapping(self):
         return self.nolp.shape[0]
 
+    def n_overlapping(self):
+        if hasattr(self,'labelled_pixels'):
+            return self.labelled_pixels.shape[0]
+        else:
+            #Assuming all pixels are labelled
+            return np.prod(self.shape)
+
+
+    def __len__(self):
+        #todo: Remove this if not needed. We only keep in case it is used somewhere
+        return self.nolp.shape[0]
 

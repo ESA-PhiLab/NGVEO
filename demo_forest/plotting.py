@@ -131,7 +131,7 @@ def scatter_confusion_plot(tile, pred, setup, N=10000, new_fig=True):
         label_names = [str(cd[0])+ '-' + str(cd[1]) + '' for cd in class_defs]
         #Confusion matrix
         cfm = np.zeros([len(class_defs),len(class_defs)])
-        cf = confusion_matrix( pred.astype('int'),ground_truth.astype('int'),)
+        cf = confusion_matrix( ground_truth.astype('int'),pred.astype('int'),)
         vals_in_cf = np.unique(np.concatenate([pred,ground_truth]))
         for i, v in enumerate(vals_in_cf):
             for j, w in enumerate(vals_in_cf):
@@ -140,8 +140,8 @@ def scatter_confusion_plot(tile, pred, setup, N=10000, new_fig=True):
         df_cm = pd.DataFrame(cfm, index=label_names, columns= label_names)
         sn.heatmap(df_cm, annot=True, fmt=".6g")
         ax = plt.gca()
-        label = ax.set_xlabel('Ground truth', va='top' )
-        label = ax.set_ylabel('Predicted', ha='right')
+        label = ax.set_ylabel('Ground truth', va='top' )
+        label = ax.set_xlabel('Predicted', ha='right')
 
         total = np.sum(cfm,0)
         corrects = np.diag(cfm)
@@ -169,7 +169,7 @@ def scatter_confusion_plot(tile, pred, setup, N=10000, new_fig=True):
 
 
 ##################### utility plotting functions #################
-from forest_cover_utils import color_tree_cover, color_height, color_height_classes, color_height_2_cls
+from forest_cover_utils import color_forest_cover, color_height, color_height_classes, color_height_2_cls
 
 
 # Visualize data 1
@@ -196,7 +196,7 @@ def plot_data(tile, bands, setup):
 
 def plot_prediction(pred,  setup, tile_with_cloud_mask=None):
     if setup['label'] == 'fractional_forest_cover':
-        label_to_color_img = color_tree_cover
+        label_to_color_img = color_forest_cover
 
     elif setup['label'] == 'vegetation_height':
         if setup['net_type'] == '2_classes':
@@ -228,7 +228,7 @@ def plot_labels(tile, setup, label=None):
         label = setup['label']
 
     if label == 'fractional_forest_cover':
-        label_to_color_img = color_tree_cover
+        label_to_color_img = color_forest_cover
 
     elif label == 'vegetation_height':
         if label == '2_classes':

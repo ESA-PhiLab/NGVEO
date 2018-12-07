@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
 import socket
@@ -30,7 +29,7 @@ def load_tiles(n=1, mode='test'):
                     limit_n_tiles=n
                     )
 
-    return tiles.files
+    return tiles.tiles
 
 def crop(data, setup):
     xy = setup['xy_coord']
