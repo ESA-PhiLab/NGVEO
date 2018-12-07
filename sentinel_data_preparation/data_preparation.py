@@ -1,7 +1,6 @@
 import json
 from sentinel_data_preparation.target_processing import TargetProcessing
 import sentinel_data_preparation.sentinel2_processing
-import sentinel_data_preparation.sentinel2_level2a_processing
 import sentinel_data_preparation.sentinel1_processing
 
 class DataPreparation():
