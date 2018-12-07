@@ -24,6 +24,10 @@ lr = 0.00004
 # other tasks if required  by replacing the labels. Labels may be provided as GeoTiffs and converted to the np-memmap-
 # structure with the data-preparation tools.
 
+#Make output folder
+if not os.path.isdir('saved_models'):
+    os.mkdir('saved_models')
+
 if len(sys.argv) <2:
     sys.argv.append(2)
 

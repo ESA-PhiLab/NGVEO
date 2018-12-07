@@ -1,7 +1,7 @@
 import numpy as np
 
 ##################### utility deep learning functions #################
-from pytorch_utils import torch_to_np, np_to_torch, gpu_no_of_var
+from dlt.basic.pytorch_utils import torch_to_np, np_to_torch, gpu_no_of_var
 
 
 def apply_net_to_large_data(data, net, patch_size, patch_overlap, apply_classifier=True):
