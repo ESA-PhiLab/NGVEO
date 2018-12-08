@@ -20,7 +20,6 @@ pip3 install -r REQUIREMENTS.txt
 - **prepare_data.py** - Move data from ESAs eodata-storage to a local storage with an efficient np.memmap-format suitable for training CNNs. Both training-data and test-data should be prepared. 
 - **train.py** - Train the CNN.
 - **predict.py** - Apply the trained network to new data and store as results as GEOtiff. 
-- **demo.ipynb** - Visualize the results using a trained model
 
 ### Credit:
 - UNet implementation by Jackson Huang: https://github.com/jaxony/unet-pytorch 
