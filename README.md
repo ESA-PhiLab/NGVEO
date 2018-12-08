@@ -8,11 +8,11 @@ The code provides a simple framework for (1) converting EO data to an efficient 
 - Make sure GDAL is installed. 
 - Download code and setup python:
 ```console
- $ git clone https://github.com/ESA-PhiLab/NGVEO.git
- $ cd NGVEO
- $ virtualenv -p python3 env
- $ source env/bin/activate
- $ pip3 install -r REQUIREMENTS.txt
+git clone https://github.com/ESA-PhiLab/NGVEO.git
+cd NGVEO
+virtualenv -p python3 env
+source env/bin/activate
+pip3 install -r REQUIREMENTS.txt
 ``` 
 - If you do not have access to ESAs eodata-drive from your computer you need to manually download the SAFE-files/folders listed in example_eodata_l*.txt (http://finder.eocloud.eu).  Also, rename the paths in these files to point to the location where the SAFE-files are downloaded.
 

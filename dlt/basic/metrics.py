@@ -10,12 +10,12 @@ def balanced_accuracy(prediction, target):
     prediction = np.argmax(prediction,1)
 
     #Remove ignore pixels
+    prediction = prediction[target.squeeze()!=-100]
     target = target[target != -100]
-    prediction = prediction[target!=-100]
 
     class_accuracies = []
     for cls in np.unique(target):
-        acc_for_class = np.mean(target[target==cls], prediction[target==cls])
+        acc_for_class = np.mean(target[target==cls]==prediction[target==cls])
         class_accuracies.append(acc_for_class)
 
     return np.mean(class_accuracies)

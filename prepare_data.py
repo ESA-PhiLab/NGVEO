@@ -16,7 +16,7 @@ config = {
     "process_clouds": "yes",
     "process_target_data": "no",
     "outdir": 'data/',
-    'tile_ids':["T32TMP","T32TNS","T32TNP","T32TPR","T32TML","T32TMK","T32TNT","T32UPU","T32TPT","T32UQU","T32UNU","T32TMN","T32TMM"]
+    'tile_ids':["T29SQB","T29SQC","T30STJ","T29TPE","T30SUJ","T32TMP","T32TNS","T32TNP","T32TPR","T32TML","T32TMK","T32TNT","T32UPU","T32TPT","T32UQU","T32UNU","T32TMN","T32TMM"]
 }
 
 s2_dp = DataPreparation(config)
@@ -50,13 +50,17 @@ def use_atm_corr_data_as_labels(atm_corr_dir, out_dir, delete_atm_corr_dir = Fal
             if 'data_b' in filename:
                 src = os.path.join(dir, filename)
 
+                atm_corr_properties = parse_eodata_folder_name(dir.split('/')[-1])
+                date_atm_corr = str(atm_corr_properties['datetime']).replace('-','').replace(':','')
+
                 #find corresponding output-folder
                 for outdir, _, _ in os.walk(out_dir):
-                    date_atm_corr = str(parse_eodata_folder_name(dir.split('/')[-1])['datetime']).replace('-','').replace(':','')
                     if date_atm_corr in outdir:
-                        dest = os.path.join(outdir, filename.replace(atm_corr_dir, '')).replace('/data_b', '/lbl_b')  # Rename data as labels
-                        print('Moving', src, 'to', dest)
-                        shutil.move(src,dest)
+                        out_properties = parse_eodata_folder_name(outdir.split('/')[-1])
+                        if atm_corr_properties['tile_id']==out_properties['tile_id']:
+                            dest = os.path.join(outdir, filename.replace(atm_corr_dir, '')).replace('/data_b', '/lbl_b')  # Rename data as labels
+                            print('Moving', src, 'to', dest)
+                            shutil.move(src,dest)
 
         if delete_atm_corr_dir:
             shutil.rmtree(atm_corr_dir)

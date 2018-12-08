@@ -1,10 +1,11 @@
 import sys
 import numpy as np
 import torch
-from torch.nn import CrossEntropyLoss, MSELoss
 from torch.optim import Adam
 
 from dlt.basic.batch import make_batch
+from dlt.basic.cross_entropy import CrossEntropyLoss
+from dlt.basic.mse_loss import MSELoss
 from dlt.basic.pytorch_utils import torch_to_np, np_to_torch
 from dlt.basic.summary import regression_summary, classification_summary
 from dlt.basic.unet import UNet
@@ -28,39 +29,48 @@ lr = 0.00004
 if not os.path.isdir('saved_models'):
     os.mkdir('saved_models')
 
+#Select which mode
 if len(sys.argv) <2:
     sys.argv.append(2)
 
-if int(sys.argv[1])==1: #Cloud detection (classification problem)
-    label_bands = ['cloud']
-    criterion = CrossEntropyLoss()
-    summary = classification_summary
+#Cloud detection (classification problem)
+if int(sys.argv[1])==1:
+    label_bands = ['cloud_mask']
     output_path = 'saved_models/cloud_detection.pt'
 
-else: #Atmospheric correction (regression problem)
-    label_bands = ['B02']
-    summary = regression_summary
-    output_path = 'saved_models/atmospheric_correction_b02.pt'
-    criterion_ = MSELoss()
+    criterion = CrossEntropyLoss()
+    summary = classification_summary
+    n_outputs = 2
+    mask_clouds=False
 
-    # A small rewrite of MSELoss to incorporate ignore-values, indicated by -100
-    def criterion(pred,target):
-        #Remove samples with target==-100
-        pred = pred[target != -100]
-        target = target[target != -100]
-        return criterion_(pred, target)
+    training_tiles = ["T29SQB","T29SQC","T30STJ"]
+    validation_tiles = ["T29TPE"]
+
+#Atmospheric correction (regression problem)
+else:
+    label_bands = ['B02'] #It is possible to add more bands here...
+    output_path = 'saved_models/atmospheric_correction_b02.pt'
+
+    criterion = MSELoss()
+    summary = regression_summary
+    n_outputs = len(label_bands)
+    mask_clouds = True
+
+    training_tiles = ["T32TMP","T32TNS","T32TNP","T32TPR","T32TML","T32TMK","T32TNT","T32UPU","T32TPT","T32UQU"]
+    validation_tiles = ["T32UNU","T32TMN"]
+
 
 #Model and optimizer
-model = UNet(num_classes=len(label_bands), in_channels=len(data_bands)).cuda(GPU_NO);
+model = UNet(num_classes=n_outputs, in_channels=len(data_bands)).cuda(GPU_NO)
 optimizer = Adam(model.parameters(),lr=lr)
 
-# Datasets (T32TMM is reserved for test)
-train_dataset = Dataset([os.path.join('data',p) for p in ["T32TNS",]], #["T32TMP","T32TNS","T32TNP","T32TPR","T32TML","T32TMK","T32TNT","T32UPU","T32TPT","T32UQU"]],
+# Datasets (T32TMM is reserved for test for the atmospheric correction setup)
+train_dataset = Dataset([os.path.join('data',p) for p in training_tiles],
                         band_identifiers=data_bands,
                         label_identifiers=label_bands,
                         )
 
-val_dataset = Dataset([os.path.join('data',p) for p in ["T32TNS",]], #["T32UNU","T32TMN"]],
+val_dataset = Dataset([os.path.join('data',p) for p in validation_tiles],
                       band_identifiers=data_bands,
                       label_identifiers=label_bands,
                       )
@@ -69,15 +79,11 @@ val_dataset = Dataset([os.path.join('data',p) for p in ["T32TNS",]], #["T32UNU",
 for iteration in range(n_iteration+1):
     model.train()
 
-    data, target = make_batch(train_dataset, win_size, batch_size)
+    data, target = make_batch(train_dataset, win_size, batch_size, mask_clouds=mask_clouds)
 
     #Put data on gpu
     data = np_to_torch(data).cuda(GPU_NO)
     target = np_to_torch(target).cuda(GPU_NO)
-    if criterion == CrossEntropyLoss:
-        target = target.long()
-    else:
-        target = target.float()
 
     #Run data through network
     pred = model(data)
@@ -99,14 +105,14 @@ for iteration in range(n_iteration+1):
 
 
     #Print results for validation every 100th epoch
-    if iteration%100==0:
+    if iteration%500==0:
         model.eval()
 
-        #Loop through 20 batches:
+        #Loop through 50 batches:
         pred = []
         target = []
         data = []
-        for i in range(20):
+        for i in range(50):
             d, t = make_batch(val_dataset, win_size, batch_size)
             p = torch_to_np(model(np_to_torch(d).cuda(GPU_NO)))
 
@@ -120,7 +126,5 @@ for iteration in range(n_iteration+1):
 
         summary(iteration, 'Validation', data, target, pred)
 
-    #Save trained model
-    if iteration%1000==0:
         torch.save(model.state_dict(), output_path)
         print('Saving model at iteration', iteration)

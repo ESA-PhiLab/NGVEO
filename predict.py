@@ -43,7 +43,7 @@ for tile in dataset.tiles:
     output = apply_net_to_large_data(data, net, pred_win_size, window_overlap, apply_classifier=target_is_classes)
 
     #Save output as GeoTiff
-    tile.export_prediction_to_tif( os.path.join('/local_disk_2/', tile.file_name +'_' + model_name +'.tif'), output)
+    tile.export_prediction_to_tif( tile.file_name +'_' + model_name +'.tif', output)
 
 
 
