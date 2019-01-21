@@ -2,7 +2,7 @@
 
 Python code for applying convolutional neural networks (CNN) to Earth Observation (EO) data from Sentinel 1 and 2 using python and PyTorch.
 
-The code provides a simple framework for (1) converting EO data to an efficient format for deep learning, (2) training CNNs, and (3) applying trained networks to new data. We provide two simple examples, one regression problem (atmospheric correction) and one classification problem (cloud detection). The code can easily be modified for other solving other problems by adding your own training data in the prepare_data.py-code. In addition we pre-trained models for tree-height estimation and forest-cover estimation can be dowloaded at LINK HERE
+The code provides a simple framework for (1) converting EO data to an efficient format for deep learning, (2) training CNNs, and (3) applying trained networks to new data. We provide two simple examples, one regression problem (atmospheric correction) and one classification problem (cloud detection). The code can easily be modified for other solving other problems by adding your own training data in the prepare_data.py-code. In addition we pre-trained models for tree-height estimation and forest-cover estimation can be dowloaded at https://www.dropbox.com/sh/fejcyzb859ek2z8/AABVx8Ic4OnnAF6EtDx4VDwIa?dl=0
 
 ### Setup:
 - Make sure GDAL is installed. 
