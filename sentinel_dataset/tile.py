@@ -62,7 +62,7 @@ class Tile(object):
             else:
                 y = np.arange(win[0]//2, self.shape[0]-win[0]//2, win[0])
                 x = np.arange(win[1]//2, self.shape[1]-win[1]//2, win[1] )
-                y, x = np.meshgrid(x, y, indexing='ij')
+                y, x = np.meshgrid(y, x, indexing='ij')
                 # import pdb; pdb.set_trace()
                 # Select pixels with mask==true
 
