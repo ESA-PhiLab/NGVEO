@@ -38,5 +38,5 @@ snuggs==1.4.2
 tifffile==2018.11.28
 toolz==0.9.0
 torch==0.4.1
-urllib3==1.24.1
+urllib3==1.24.2
 utm==0.4.2
