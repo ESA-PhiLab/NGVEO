@@ -18,7 +18,7 @@ kiwisolver==1.0.1
 lightgbm==2.2.2
 matplotlib==3.0.2
 networkx==2.2
-numpy==1.15.4
+numpy==1.22.0
 Pillow==9.0.1
 pyparsing==2.3.0
 pyproj==1.9.5.1
