@@ -12,7 +12,7 @@ cycler==0.10.0
 dask==2021.10.0
 decorator==4.3.0
 docutils==0.14
-idna==2.7
+idna==3.7
 jmespath==0.9.3
 kiwisolver==1.0.1
 lightgbm==2.2.2
