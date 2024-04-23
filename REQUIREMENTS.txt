@@ -25,7 +25,7 @@ pyproj==1.9.5.1
 python-dateutil==2.7.5
 PyWavelets==1.0.1
 rasterio==1.0.11
-requests==2.20.1
+requests==2.31.0
 s2cloudless==1.2.2
 s3transfer==0.1.13
 scikit-image==0.14.1
