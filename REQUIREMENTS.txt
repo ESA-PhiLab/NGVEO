@@ -37,6 +37,6 @@ six==1.11.0
 snuggs==1.4.2
 tifffile==2018.11.28
 toolz==0.9.0
-torch==0.4.1
+torch==1.13.1
 urllib3==1.26.18
 utm==0.4.2
