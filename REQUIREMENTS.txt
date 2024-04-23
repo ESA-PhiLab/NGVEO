@@ -30,7 +30,7 @@ s2cloudless==1.2.2
 s3transfer==0.1.13
 scikit-image==0.14.1
 scikit-learn==0.20.1
-scipy==1.1.0
+scipy==1.11.1
 sentinelhub==2.4.6
 Shapely==1.6.4.post2
 six==1.11.0
