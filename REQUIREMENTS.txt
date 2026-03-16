@@ -2,7 +2,7 @@ affine==2.2.1
 attrs==18.2.0
 boto3==1.9.61
 botocore==1.12.61
-certifi==2023.7.22
+certifi==2024.7.4
 chardet==3.0.4
 Click==7.0
 click-plugins==1.0.4
